@@ -32,6 +32,8 @@ exports = module.exports = internals.Client = function () {
  */
 internals.Client.prototype.request = function (url, callback) {
 
+  this.logger.info('Client requesting', url);
+
   // Raw or no
   var request = process.env.HTTP2_PLAIN ?
                   internals.Http2.raw.get(url) :
@@ -55,7 +57,9 @@ internals.Client.prototype._onResponse = function (response) {
 
     this.logger.info('Response httpVersion header:', response.httpVersion);
 
-    response.pipe(process.stdout);
+    var filename = internals.Path.join(__dirname, '/tmp/push-primary.tmp');
+
+    response.pipe(internals.Fs.createWriteStream(filename));
     return response.on('end', this._finish.bind(this));
 }
 
@@ -67,7 +71,9 @@ internals.Client.prototype._onResponse = function (response) {
  */
 internals.Client.prototype._onPushRequest = function (pushRequest) {
 
-  var filename = internals.Path.join(__dirname, '/tmp/push-' + this._push_count + '.tmp');
+  this.logger.info('Server is requesting to push', pushRequest.url);
+
+  var filename = internals.Path.join(__dirname, '/tmp' +  pushRequest.url + '.tmp');
   this._push_count += 1;
   this.logger.info('Receiving pushed resource: ' + pushRequest.url + ' -> ' + filename);
 
@@ -94,6 +100,7 @@ internals.Client.prototype._finish = function () {
 
   this._finished += 1;
   if (this._finished === (1 + this._push_count)) {
+    this.logger.info('Finished closing connection with server');
     return this._callback();
   }
 }
