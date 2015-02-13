@@ -34,8 +34,8 @@ internals.Client.prototype.request = function (url, callback) {
 
   // Raw or no
   var request = process.env.HTTP2_PLAIN ?
-                        internals.Http2.raw.get(url) :
-                        internals.Http2.get(url);
+                  internals.Http2.raw.get(url) :
+                  internals.Http2.get(url);
 
   this._callback = callback;
 

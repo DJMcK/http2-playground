@@ -17,6 +17,7 @@ exports = module.exports = internals.Request = function (request, response, rawR
   this.raw = rawRequest;
   this.request = request;
   this.response = response;
+  this.cache = new Cache();
 
   return this._onRequest(request, response);
 }
@@ -32,7 +33,7 @@ internals.Request.prototype._onRequest = function (request, response) {
 
   this.path = (request.url === '/') ? '/index.html' : request.url;
 
-  return Cache.get(this.path, this._cacheCallback.bind(this));
+  return this.cache.get(this.path, this._cacheCallback.bind(this));
 }
 
 
@@ -89,7 +90,7 @@ internals.Request.prototype._getApplicationAssets = function (assets, callback) 
 
   for (var i = 0, il = assets.length; i < il; ++i) {
 
-    Cache.get(assets[i], (function getCachedAssetCallback () {
+    this.cache.get(assets[i], (function getCachedAssetCallback () {
 
       var asset = assets[i];
 

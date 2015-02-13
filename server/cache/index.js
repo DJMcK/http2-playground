@@ -4,10 +4,26 @@ var Fs = require('fs');
 var internals = {};
 
 // Instantiate cache store
-internals.cache = {};
+// internals.cache = {};
 
 // Path to WWW root
 internals.publicPath = Path.join(__dirname, '../public');
+
+
+/**
+ * Constructor for cache
+ * @public
+ */
+exports = module.exports = internals.Cache = function () {
+
+  if (!(this.constructor === internals.Cache)) throw new Error('Call with new');
+
+  this.cache = {};
+
+  return {
+    get: this.get.bind(this)
+  }
+}
 
 
 /**
@@ -16,11 +32,11 @@ internals.publicPath = Path.join(__dirname, '../public');
  * @param  {Function} callback
  * @public
  */
-internals.get = function (path, callback) {
+internals.Cache.prototype.get = function (path, callback) {
 
   var publicPath = Path.join(internals.publicPath, path);
 
-  return internals._get(publicPath, callback);
+  return this._get(publicPath, callback);
 };
 
 
@@ -30,13 +46,13 @@ internals.get = function (path, callback) {
  * @param  {Function} callback
  * @private
  */
-internals._get = function (path, callback) {
+internals.Cache.prototype._get = function (path, callback) {
 
-  if (internals.cache[path]) {
-    return callback(null, internals.cache[path]);
+  if (this.cache[path]) {
+    return callback(null, this.cache[path]);
   }
 
-  return internals._check(path, callback);
+  return this._check(path, callback);
 };
 
 
@@ -46,16 +62,17 @@ internals._get = function (path, callback) {
  * @param  {Function} callback
  * @private
  */
-internals._check = function (path, callback) {
+internals.Cache.prototype._check = function (path, callback) {
+  var self = this;
 
-  internals._check.exists(path, function existsCallback (state) {
+  this._check.exists(path, function existsCallback (state) {
 
     if (!state) callback(new Error('File does not exist'));
 
-    return internals._check.stat(path, function isFileCallback (err, stat) {
+    return self._check.stat(path, function isFileCallback (err, stat) {
 
       if (err) callback(err);
-      return internals._cacheFile(path, stat, callback);
+      return self._cacheFile(path, stat, callback);
     });
   });
 };
@@ -66,7 +83,7 @@ internals._check = function (path, callback) {
  * @param  {Function} callback
  * @private
  */
-internals._check.exists = function (path, callback) {
+internals.Cache.prototype._check.exists = function (path, callback) {
 
   return Fs.exists(path, callback);
 };
@@ -77,7 +94,7 @@ internals._check.exists = function (path, callback) {
  * @param  {Function} callback
  * @private
  */
-internals._check.stat = function (path, callback) {
+internals.Cache.prototype._check.stat = function (path, callback) {
 
   return Fs.stat(path, callback);
 };
@@ -90,7 +107,8 @@ internals._check.stat = function (path, callback) {
  * @param  {Function} callback
  * @private
  */
-internals._cacheFile = function (path, stat, callback) {
+internals.Cache.prototype._cacheFile = function (path, stat, callback) {
+  var self = this;
 
   return Fs.readFile(path, 'utf8', function readCallback (err, data) {
 
@@ -101,11 +119,8 @@ internals._cacheFile = function (path, stat, callback) {
       content: data
     }
 
-    internals.cache[path] = cacheData;
+    self.cache[path] = cacheData;
 
-    return internals._get(path, callback);
+    return self._get(path, callback);
   });
 };
-
-
-exports.get = internals.get;
