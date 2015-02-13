@@ -4,7 +4,8 @@
   "description": "Example of HTTP2 in action",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js | ./node_modules/.bin/bunyan",
+    "client": "node client.js https://localhost:8000 | ./node_modules/.bin/bunyan"
   },
   "author": "David McKeown <david.mck@outlook.com> (http://djm.io/)",
   "license": "MIT",
