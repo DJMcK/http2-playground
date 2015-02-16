@@ -14,7 +14,7 @@ internals.publicPath = Path.join(__dirname, '../public');
  * Constructor for cache
  * @public
  */
-exports = module.exports = internals.Cache = function () {
+internals.Cache = function () {
 
   if (!(this.constructor === internals.Cache)) throw new Error('Call with new');
 
@@ -112,7 +112,7 @@ internals.Cache.prototype._cacheFile = function (path, stat, callback) {
 
   return Fs.readFile(path, 'utf8', function readCallback (err, data) {
 
-    if (err) callback(err)
+    if (err) callback(err);
 
     var cacheData = {
       stat: stat,
@@ -124,3 +124,6 @@ internals.Cache.prototype._cacheFile = function (path, stat, callback) {
     return self._get(path, callback);
   });
 };
+
+
+exports = module.exports = new internals.Cache();

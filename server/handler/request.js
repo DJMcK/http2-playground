@@ -1,8 +1,8 @@
 var internals = {};
-var Cache = require('../cache');
 var Readable = require('stream').Readable;
 var Response = require('./response');
 
+internals.Cache = require('../cache');
 
 /**
  * Create new request handler
@@ -10,14 +10,12 @@ var Response = require('./response');
  * @param {Object} response
  * @public
  */
-exports = module.exports = internals.Request = function (request, response, rawRequest) {
+exports = module.exports = internals.Request = function (request, response) {
 
   if (!(this.constructor === internals.Request)) throw new Error('Call with new');
 
-  this.raw = rawRequest;
   this.request = request;
   this.response = response;
-  this.cache = new Cache();
 
   return this._onRequest(request, response);
 }
@@ -33,7 +31,7 @@ internals.Request.prototype._onRequest = function (request, response) {
 
   this.path = (request.url === '/') ? '/index.html' : request.url;
 
-  return this.cache.get(this.path, this._cacheCallback.bind(this));
+  return internals.Cache.get(this.path, this._cacheCallback.bind(this));
 }
 
 
@@ -90,7 +88,7 @@ internals.Request.prototype._getApplicationAssets = function (assets, callback) 
 
   for (var i = 0, il = assets.length; i < il; ++i) {
 
-    this.cache.get(assets[i], (function getCachedAssetCallback () {
+    internals.Cache.get(assets[i], (function getCachedAssetCallback () {
 
       var asset = assets[i];
 

@@ -7,11 +7,10 @@ var Readable = require('stream').Readable;
  * @param {Object} response
  * @public
  */
-exports = module.exports = internals.Response = function (response, rawRequest) {
+exports = module.exports = internals.Response = function (response) {
 
   if (!(this.constructor === internals.Response)) throw new Error('Call with new');
 
-  this.raw = rawRequest;
   this.response = response;
 
   return {
