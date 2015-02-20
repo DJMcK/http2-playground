@@ -40,6 +40,7 @@ internals.Client.prototype.request = function (url, callback) {
                   internals.Http2.get(url);
 
   this._callback = callback;
+  this.url = url;
 
   request.on('response', this._onResponse.bind(this));
   request.on('push', this._onPushRequest.bind(this));
@@ -55,12 +56,16 @@ internals.Client.prototype.request = function (url, callback) {
  */
 internals.Client.prototype._onResponse = function (response) {
 
-    this.logger.info('Response httpVersion header:', response.httpVersion);
+  this.logger.info('Response httpVersion header:', response.httpVersion);
 
-    var filename = internals.Path.join(__dirname, '/tmp/push-primary.tmp');
+  var filename = internals.Path.join(__dirname, '/tmp/push-primary.tmp');
 
-    response.pipe(internals.Fs.createWriteStream(filename));
-    return response.on('end', this._finish.bind(this));
+  this.logger.info('Receiving primary response: ' + this.url + ' -> ' + filename);
+
+  // Pipe response stream to file
+  response.pipe(internals.Fs.createWriteStream(filename));
+
+  return response.on('end', this._finish.bind(this));
 }
 
 
@@ -72,13 +77,15 @@ internals.Client.prototype._onResponse = function (response) {
 internals.Client.prototype._onPushRequest = function (pushRequest) {
 
   this.logger.info('Server is requesting to push', pushRequest.url);
-
-  var filename = internals.Path.join(__dirname, '/tmp' +  pushRequest.url + '.tmp');
   this._push_count += 1;
-  this.logger.info('Receiving pushed resource: ' + pushRequest.url + ' -> ' + filename);
 
   pushRequest.on('response', function onPushResponse (pushResponse) {
 
+    var filename = internals.Path.join(__dirname, '/tmp' +  pushRequest.url + '.tmp');
+
+    this.logger.info('Receiving pushed response: ' + pushRequest.url + ' -> ' + filename);
+
+    // Pipe push response stream to file
     pushResponse.pipe(
       internals
         .Fs.createWriteStream(filename))

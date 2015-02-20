@@ -9,7 +9,6 @@ var internals = {};
 exports = module.exports = internals.Handler = function () {
 
   if (!(this.constructor === internals.Handler)) throw new Error('Call with new');
-
 }
 
 
